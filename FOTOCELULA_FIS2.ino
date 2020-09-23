@@ -1,0 +1,70 @@
+double periodo = 0;
+double  periodoseg = 0;
+int ldr = A0;
+int botao = A5;
+int aux = 0;
+int estadobotao = 0;
+int valorldr = 0;
+int nregistro = 0;
+unsigned long startMillis;
+unsigned long endMillis;
+
+void setup() {
+  pinMode(ldr, INPUT);
+  pinMode(botao, INPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  estadobotao = analogRead(botao);
+
+  if (estadobotao >= 1020 && aux == 0) {
+    Serial.println("PRONTO PARA REALIZAR MEDICAO!");
+    aux = 1;
+  }
+
+  valorldr = analogRead(ldr);
+  while (valorldr < 450 && aux == 1) {
+    valorldr = analogRead(ldr);
+    if (valorldr >= 450 && aux == 1) {
+      startMillis = millis();
+      aux = 2;
+    }
+  }
+
+  valorldr = analogRead(ldr);
+  while (valorldr < 450 && aux == 2) {
+    valorldr = analogRead(ldr);
+    if (valorldr >= 450) {
+      aux = 3;
+    }
+  }
+
+  valorldr = analogRead(ldr);
+  while (valorldr < 450 && aux == 3) {
+    endMillis = millis();
+    periodo = (endMillis - startMillis);
+    periodoseg = (periodo / 1000);
+    Serial.print("PERIODO REGISTRO No: ");
+    nregistro = nregistro + 1;
+    Serial.println(nregistro);
+    Serial.print("T= ");
+    Serial.println(periodoseg);
+    while (estadobotao < 1020) {
+      estadobotao = analogRead(botao);
+      aux = 0;
+    }
+  }
+
+  /*
+    Serial.print("aux= ");
+    Serial.println(aux);
+    Serial.print("botao= ");
+    Serial.println(digitalRead(botao));
+    Serial.print("valor ldr: ");
+    Serial.println(valorldr);
+    delay(50);
+  */
+
+}
