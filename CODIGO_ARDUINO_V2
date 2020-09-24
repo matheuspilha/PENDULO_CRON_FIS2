@@ -1,0 +1,314 @@
+double periodo1 = 0;
+double periodo2 = 0;
+double periodo3 = 0;
+double periodo4 = 0;
+double periodo5 = 0;
+double periodo6 = 0;
+double periodo7 = 0;
+double periodo8 = 0;
+double periodo9 = 0;
+double periodo10 = 0;
+
+double  periodoseg1 = 0;
+double  periodoseg2 = 0;
+double  periodoseg3 = 0;
+double  periodoseg4 = 0;
+double  periodoseg5 = 0;
+double  periodoseg6 = 0;
+double  periodoseg7 = 0;
+double  periodoseg8 = 0;
+double  periodoseg9 = 0;
+double  periodoseg10 = 0;
+
+int ldr = A0;
+int botao = A5;
+int aux = 0;
+int estadobotao = 0;
+int valorldr = 0;
+int nregistro = 1;
+int ledamarelo2 = 8;
+int ledamarelo1 = 9;
+int ledverde = 10;
+int ledverde2 = 12;
+int ledvermelho = 11;
+int minldr = 450;
+int laser = 0;
+int pronto = 1;
+int estabilidade = 0;
+int traco = 0;
+int plot = 0;
+unsigned long startMillis;
+unsigned long endMillis;
+unsigned long currentMillis;
+
+void setup() {
+  pinMode(ldr, INPUT);
+  pinMode(ledverde, OUTPUT);
+  pinMode(ledverde2, OUTPUT);
+  pinMode(ledamarelo1, OUTPUT);
+  pinMode(ledamarelo2, OUTPUT);
+  pinMode(ledvermelho, OUTPUT);
+  pinMode(botao, INPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  estadobotao = analogRead(botao);
+  if (estadobotao >= 1020 && pronto == 1) {
+    aux = 0;
+    while (aux == 0) {
+      valorldr = analogRead(ldr);
+      if (valorldr < minldr) {
+        while (laser == 0) {
+          Serial.print("POSICIONE O LASER CORRETAMENTE! LDR BAIXO: ");
+          Serial.println(valorldr);
+          laser = 1;
+        }
+        digitalWrite(ledvermelho, HIGH);
+        delay(50);
+        digitalWrite(ledverde, HIGH);
+        delay(50);
+        digitalWrite(ledverde, LOW);
+        delay(50);
+        valorldr = analogRead(ldr);
+      }
+
+      if (valorldr > minldr) {
+        pronto = 0;
+        laser = 0;
+
+        digitalWrite(ledvermelho, LOW);
+        digitalWrite(ledverde, HIGH);
+        digitalWrite(ledamarelo1, LOW);
+        digitalWrite(ledamarelo2, LOW);
+
+        while (pronto == 0) {
+          Serial.print("LASER CORRETAMENTE POSICIONADO - LDR: ");
+          Serial.println(valorldr);
+          estabilidade = 5;
+
+          while (valorldr > minldr && estabilidade >= 0) {
+
+            Serial.print("VERIFICANDO ESTABILIDADE - CONTAGEM REGRESSIVA: ");
+            Serial.println(estabilidade);
+            estabilidade = estabilidade - 1;
+            digitalWrite(ledverde, LOW);
+            delay(250);
+            digitalWrite(ledverde, HIGH);
+            delay(250);
+
+            valorldr = analogRead(ldr);
+
+            if (estabilidade == 0) {
+              aux = 1;
+              Serial.println("VERIFICANDO ESTABILIDADE - CONTAGEM REGRESSIVA: 0");
+              Serial.println("PRONTO PARA REALIZAR A MEDICAO!");
+              nregistro = 0;
+              digitalWrite(ledverde2, HIGH);
+              pronto = 0;
+              break;
+            }
+          }
+          pronto = 1;
+        }
+        valorldr = analogRead(ldr);
+      }
+    }
+  }
+
+  valorldr = analogRead(ldr);
+  while (valorldr < minldr && nregistro < 10 && aux == 1) {
+    valorldr = analogRead(ldr);
+    if (valorldr >= minldr && nregistro < 10 && aux == 1) {
+
+      Serial.println("CRONOMETRO INICIADO");
+      startMillis = millis();
+
+      Serial.println("PENDULO PASSOU PELA PRIMEIRA VEZ DE TRES!");
+
+      digitalWrite(ledverde, LOW);
+      digitalWrite(ledverde2, LOW);
+      digitalWrite(ledamarelo1, HIGH);
+      digitalWrite(ledamarelo2, LOW);
+      aux = 2;
+      break;
+    }
+  }
+
+  valorldr = analogRead(ldr);
+  while (valorldr < minldr && nregistro < 10 && aux == 2) {
+    valorldr = analogRead(ldr);
+    if (valorldr >= minldr) {
+      Serial.println("PENDULO PASSOU PELA SEGUNDA VEZ DE TRES!");
+      digitalWrite(ledverde, LOW);
+      digitalWrite(ledamarelo1, HIGH);
+      digitalWrite(ledamarelo2, HIGH);
+      aux = 3;
+      break;
+    }
+  }
+
+  valorldr = analogRead(ldr);
+  while (valorldr < minldr && nregistro <= 10 && aux == 3) {
+
+    currentMillis = millis();
+
+    traco = 24;
+    while (traco >= 0) {
+      Serial.print("-");
+      traco = traco - 1;
+    }
+
+    Serial.println("-");
+    Serial.print("PERIODO REGISTRO No: ");
+    nregistro = nregistro + 1;
+    Serial.println(nregistro);
+
+    switch (nregistro) {
+
+      case 1:
+        periodo1 = (currentMillis - startMillis);
+        periodoseg1 = (periodo1 / 1000);
+        Serial.print("T= ");
+        Serial.println(periodoseg1);
+        break;
+
+      case 2:
+        periodo2 = (currentMillis - startMillis);
+        periodoseg2 = (periodo2 / 1000);
+        Serial.print("T= ");
+        Serial.println(periodoseg2);
+        break;
+
+      case 3:
+        periodo3 = (currentMillis - startMillis);
+        periodoseg3 = (periodo3 / 1000);
+        Serial.print("T= ");
+        Serial.println(periodoseg3);
+        break;
+
+      case 4:
+        periodo4 = (currentMillis - startMillis);
+        periodoseg4 = (periodo4 / 1000);
+        Serial.print("T= ");
+        Serial.println(periodoseg4);
+        break;
+
+      case 5:
+        periodo5 = (currentMillis - startMillis);
+        periodoseg5 = (periodo5 / 1000);
+        Serial.print("T= ");
+        Serial.println(periodoseg5);
+        break;
+
+      case 6:
+        periodo6 = (currentMillis - startMillis);
+        periodoseg6 = (periodo6 / 1000);
+        Serial.print("T= ");
+        Serial.println(periodoseg6);
+        break;
+
+      case 7:
+        periodo7 = (currentMillis - startMillis);
+        periodoseg7 = (periodo7 / 1000);
+        Serial.print("T= ");
+        Serial.println(periodoseg7);
+        break;
+
+      case 8:
+        periodo8 = (currentMillis - startMillis);
+        periodoseg8 = (periodo8 / 1000);
+        Serial.print("T= ");
+        Serial.println(periodoseg8);
+        break;
+
+      case 9:
+        periodo9 = (currentMillis - startMillis);
+        periodoseg9 = (periodo9 / 1000);
+        Serial.print("T= ");
+        Serial.println(periodoseg9);
+        break;
+
+      case 10:
+        periodo10 = (currentMillis - startMillis);
+        periodoseg10 = (periodo10 / 1000);
+        Serial.print("T= ");
+        Serial.println(periodoseg10);
+        pronto = 0;
+        plot = 0;
+        break;
+    }
+    aux = 1;
+  }
+
+  while (nregistro == 10 && pronto == 0) {
+
+    while (estadobotao < 1020 && plot == 0) {
+      digitalWrite(ledamarelo1, LOW);
+      digitalWrite(ledamarelo2, LOW);
+      delay(75);
+      digitalWrite(ledvermelho, HIGH);
+      delay(75);
+      digitalWrite(ledvermelho, LOW);
+      estadobotao = analogRead(botao);
+    }
+
+    if (plot == 0) {
+
+      traco = 34;
+      while (traco >= 0) {
+        Serial.print("-");
+        traco = traco - 1;
+      }
+      Serial.println("-");
+
+      Serial.println("VALORES T EM SEGUNDOS PARA EXCEL:");
+      traco = 34;
+      while (traco >= 0) {
+        Serial.print("-");
+        traco = traco - 1;
+      }
+      Serial.println("-");
+
+      Serial.println(periodoseg1);
+      Serial.println(periodoseg2);
+      Serial.println(periodoseg3);
+      Serial.println(periodoseg4);
+      Serial.println(periodoseg5);
+      Serial.println(periodoseg6);
+      Serial.println(periodoseg7);
+      Serial.println(periodoseg8);
+      Serial.println(periodoseg9);
+      Serial.println(periodoseg10);
+
+      traco = 34;
+      while (traco >= 0) {
+        Serial.print("-");
+        traco = traco - 1;
+      }
+      Serial.println("-");
+
+      digitalWrite(ledverde, HIGH);
+      plot = 1;
+    }
+
+    estadobotao = analogRead(botao);
+    delay(50);
+    if (estadobotao >= 1020 && plot == 1) {
+      pronto = 1;
+      break;
+    }
+  }
+}
+
+
+/*
+  Serial.print("aux= ");
+  Serial.println(aux);
+  Serial.print("botao= ");
+  Serial.println(digitalRead(botao));
+  Serial.print("valor ldr: ");
+  Serial.println(valorldr);
+  delay(50);
+*/
